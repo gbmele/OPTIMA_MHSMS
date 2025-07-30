@@ -1,0 +1,5 @@
+gm,assign_shifts,saturday,a,0,0
+db,assign_shifts,saturday,a,1,1
+gm,no_consec
+db,no_consec
+db,no_split_weekends

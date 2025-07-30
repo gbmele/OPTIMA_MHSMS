@@ -1,0 +1,75 @@
+BEGIN {
+
+  #usage gawk -f p1.txt roster.txt staff_constraints.txt staff_sic.txt
+
+  commands["no_consec"]
+  commands["no_split_weekends"]
+  commands["no_fri_pm_before_weekend"]
+  SIC["in_charge"]
+  SIC["ssu"]
+  SIC["oncall"]
+  FS = ",";
+  dump = "zdump.txt"
+  print "start" > dump
+}
+
+{
+  doc = toupper($1)
+  command = $2
+
+
+  # --- Function calls ---
+
+  # Single-argument function
+  if (command in commands  && NF == 2) {
+     printf "constraint %s(%s);\n", command, doc
+  }
+  # Parameterized function
+  else if (command == "assign_shifts" && NF > 2) {
+     printf "constraint %s(%s", command, doc
+     for (i = 3; i <= NF; i++) {
+       printf ", %s", $i
+    }
+    print ");"
+  } else if(command in SIC){
+      #constraint global_cardinality_low_up(ssu[BL,..],[1],[2],[ssu_hi]);
+       lo=$3; hi=$4
+       printf "constraint global_cardinality_low_up(%s[%s,..],[1],[%s],[%s]);\n",command , doc,lo,hi
+    }
+
+  # --- Doctor shift line ---
+  else {
+    if (!(doc in seen)) {
+      seen[doc] = 1
+      docs[++count] = doc
+    }
+
+    for (i = 2; i <= NF; i++) {
+      day = i - 1
+      shift = $i
+      if (toupper($1) == "DAYINDEX") next
+      if ($1==" *"){
+         printf "constraint roster[%s,%d] = %s;\n", doc, day, "o";}
+
+      else if (shift == "z")
+         printf "constraint roster[%s,%d] = a \\/ roster[%s,%d] = p \\/ roster[%s,%d] = o;\n", doc, day, doc, day, doc, day
+      else if (shift == "ua") {
+        printf "constraint roster[%s,%d] != a;\n", doc, day
+      } else 
+      if (shift == "up") {
+        printf "constraint roster[%s,%d] != p;\n", doc, day
+      } else {
+        printf "constraint roster[%s,%d] = %s;\n", doc, day, shift
+      }#endif
+    }#endfor
+  }
+}
+
+END {
+  printf "\nenum docs = {"
+  for (i = 1; i <= count; i++) {
+    printf "%s", docs[i]
+    if (i < count) printf ", "
+  }
+  print "};"
+}
