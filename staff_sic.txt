@@ -1,5 +1,0 @@
-cc,oncall,4,5
-cc,ssu,1,4
-db,in_charge,0,4
-db,ssu,3,5
-db,oncall,3,5
