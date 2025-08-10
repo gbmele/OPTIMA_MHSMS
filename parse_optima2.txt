@@ -1,0 +1,153 @@
+BEGIN {
+  
+  ## usage gawk -f parse_optima2.txt "THE OPTIMA CSV DOWNLOAD FILE" 
+
+  FS = ","
+  OFS = ","
+
+  DOC["Land"]="bl"
+  DOC["Mele"]="gm"
+  DOC["Bui"]="db"
+  DOC["Cobelas"]="cc"
+  DOC["Chong"]="mc"
+  DOC["Lowman"]="dl"
+  DOC["Marson"]="rm"
+  DOC["Dowling"]="sd"
+  DOC["Laurence"]="hl"
+  DOC["Nathan"]="gn"
+  DOC["Archer"]="pa"
+  DOC["Bridgart"]="tb"
+  DOC["Bridgford"]="lb"
+  DOC["Clarke"]="lc"
+  DOC["Hezekiah"]="dh"
+  DOC["Kapitan"]="sk"
+  DOC["Lew"]="ml"
+  DOC["Lim"]="jl"
+  DOC["Primrose"]="rp"
+  DOC["Rathe"]="sr"
+  DOC["Rosengarten"]="ar"
+  DOC["Smith"]="ls"
+  DOC["Varma"]="av"
+  DOC["Hannon"]="fh"
+  DOC["Hoo"]="xh"
+  DOC["Knight"]="ck"
+  DOC["Lee"]="blee"
+  DOC["Mccarthy"]="bm"  #brendon
+  DOC["Moussa"]="km"    #karim
+  DOC["Wallace"]="aw"   #andrew
+
+
+
+
+
+  # Define valid weekday labels
+  weekdays["Mon"] = \
+  weekdays["Tue"] = weekdays["Wed"] = weekdays["Thu"] = weekdays["Fri"] = weekdays["Sat"] = weekdays["Sun"] = 1
+
+  # Shift translation map
+  translate["CST 0800-1800"] = "c"
+  translate["CST 0800-1700"] = "c"
+  translate["CST 0800-1600"] = "c"
+  translate["CST 1200-1800"] = "c"
+  translate["CST 1200-1500"] = "c"
+  translate["CST 1200-1600"] = "c"
+  translate["CST 1100-1600"] = "c"
+  translate["CST 1400-1600"] = "p"
+  translate["CST 1600-1800"] = "c"
+  translate["CST 1700-1800"] = "c"
+  translate["CST 1400-1800"] = "c"
+
+  translate["MH 0800-1800 SSU"] = "a"
+  translate["MH 0800-1800 IC"] = "a"
+  translate["MH 0800-1800"] = "a"
+  translate["MH 0800-1700 SSU"] = "a"
+  translate["MH 0800-1700 IC"] = "a"
+  translate["MH 0800-1700"] = "a"
+  translate["MH 0800-1200"] = "a"
+  translate["MH 0800-1600 SSU"] = "a"
+  translate["MH 0800-1600 IC"] = "a"
+  translate["MH 0800-1600"] = "a"
+  translate["MH 1600-2400"] = "p"
+  translate["MH 1400-2400"] = "p"
+  translate["MH 1700-2400"] = "p"
+
+  translate["CONF"] = "cl"
+  translate["AL"] = "al"
+  translate["LPPA"] = "lppa"
+  translate["L-WOP"] = "lwop"
+  translate["oc"] = "p"
+  translate["OnCall"] = "p"
+  translate["0000-0800 OC CAT2"] = "p"
+  translate["DFL"]="l"
+
+  translate["U 0000-2359"]="o"
+  translate["AP 0000-2359"]="apo"
+  translate["AA 0800-1800"]="a"
+  translate["PP 1400-2400"]="p"
+  translate["UP 1900-2400"]="ao"
+  translate["UA 0800-1100"]="po"
+
+}
+
+{
+  # First pass: fill blanks with "*"
+  for (i = 1; i <= NF; i++) {
+    if ($i == "") $i = "o"
+  }
+
+  # Detect weekday header row
+  if (!header_found) {
+    for (i = 1; i <= NF; i++) {
+      if ($i in weekdays) {
+        KEEP[i] = 1
+        DAY[i] = ++day_counter
+      }
+    }
+
+    #if (day_counter > 0) {
+    #  printf "dayindex"
+    #  for (i = 1; i <= NF; i++) {
+    #    if (KEEP[i]) printf OFS DAY[i]
+    #  }
+    #  print ""
+    #  header_found = 1
+    #}
+    #next
+  }
+
+  # Process doctor/specialist rows
+  if ($1 ~ /^\"(Doctor|Specialist) - /) {
+    gsub(/^\"(Doctor|Specialist) - |\"$/, "", $1)
+
+    name = translate_doc($1)      ## if doc not in array then name="no_doc"
+
+    row = name
+
+
+
+    for (i = 1; i <= NF; i++) {
+      if(i==1 && row=="no_doc")next        #doc not in roster so doc="no_doc"
+      if($1=="dayindex")next
+      if (KEEP[i-1]) {
+        shift = $i
+        row = row OFS translate_shift(shift)
+      }
+    }
+    print row
+  }
+}
+
+
+END{
+
+}
+
+
+
+function translate_shift(SHIFT) {
+  return (SHIFT in translate) ? translate[SHIFT] : SHIFT
+}
+function translate_doc(doc) {
+  return (doc in DOC) ? DOC[doc] : "no_doc"
+}
+
