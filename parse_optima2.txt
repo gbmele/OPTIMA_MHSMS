@@ -2,6 +2,7 @@ BEGIN {
   
   ## usage gawk -f parse_optima2.txt "THE OPTIMA CSV DOWNLOAD FILE" 
 
+  ## h
   FS = ","
   OFS = ","
 
