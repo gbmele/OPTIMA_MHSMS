@@ -1,0 +1,203 @@
+#!/usr/bin/awk -f
+
+#usage gawk -f to_minizinc2.txt test_csv.txt > test_mzn.mzn
+
+
+BEGIN {
+    FS = ","; OFS = ",";
+    doc_count = 0;
+
+    # Define leave shifts
+    leave_shifts["al"] = 1;
+    leave_shifts["cl"] = 1;
+    leave_shifts["sabb"] = 1;
+    leave_shifts["mat"] = 1;
+    leave_shifts["pat"] = 1;
+    leave_shifts["perl"] = 1;
+    leave_shifts["lwop"] = 1;
+    leave_shifts["phnw"] = 1;
+    leave_shifts["lppa"] = 1;
+    leave_shifts["dfl"] = 1;  ##Defence Force Leave
+
+
+    # Define regular shifts
+    regular_shifts["a"] = 1;
+    regular_shifts["p"] = 1;
+    regular_shifts["o"] = 1;
+    regular_shifts["c"] = 1;
+    regular_shifts["s"] = 1;
+    regular_shifts["i"] = 1;
+    regular_shifts["l"] = 1;
+    regular_shifts["x"] = 1;
+    regular_shifts["u"] = 1;
+
+
+    constraint_patterns["sic"] = "(sic)"
+
+}
+
+# Format shift request into a MiniZinc set
+function format_shift(s,    i, out) {
+    if (s in leave_shifts) {
+        return "{" s "}";
+    } else {
+        out = "{";
+        for (i = 1; i <= length(s); i++) {
+            out = out substr(s, i, 1);
+            if (i < length(s)) out = out ", ";
+        }
+        out = out "}";
+        return out;
+    }
+}
+
+
+
+# Read each line of CSV  doc,shift,shift,shift,...
+{
+    doc_count++;
+    docs[doc_count] = $1;
+    for (i = 2; i <= NF; i++) {
+        shifts_matrix[doc_count, i - 1] = format_shift($i);
+    }
+}
+
+
+
+
+
+
+
+END {
+    num_days = NF - 1;
+
+    # Include files
+    print "include \"globals.mzn\";";
+    print "include \"global_calendar.mzn\";";
+    print "include \"SIC.mzn\";";
+    print "include \"CSV_OUTPUT.mzn\";";
+    print "";
+
+    # DAYS constant and days set
+    printf "int: DAYS = %d;\n", num_days;
+    print "set of int: days = 1..DAYS;\n";
+
+    # Docs enum
+    printf "enum docs = {";
+    for (i = 1; i <= doc_count; i++) {
+        printf "%s", docs[i];
+        if (i < doc_count) printf ", ";
+    }
+    print "};";
+
+    # Unified shifts enum: regular first, then leave
+    printf "enum shifts = {";
+    count = 0;
+    for (s in regular_shifts) {
+        printf "%s", s;
+        count++;
+        printf ", ";
+    }
+    for (s in leave_shifts) {
+        printf "%s", s;
+        count++;
+        if (count < length(regular_shifts) + length(leave_shifts)) printf ", ";
+    }
+    print "};";
+
+    # Leave shifts subset
+    printf "set of shifts: leave_shifts = {";
+    count = 0;
+    for (s in leave_shifts) {
+        printf "%s", s;
+        count++;
+        if (count < length(leave_shifts)) printf ", ";
+    }
+    print "};";
+
+    # Decision variables and constraints
+    print "";
+    print "% ===== DECISION VARIABLES =====";
+    print "array[docs, 1..DAYS] of var shifts: roster;"
+    print "array[docs, 1..DAYS] of var 0..1: ssu;"
+    print "array[docs, 1..DAYS] of var 0..1: incharge;"
+    print "array[docs, 1..DAYS] of var 0..1: oncall;"
+    print "";
+
+    print "% ===== CONSTRAINTS =====";
+    print " constraint forall(doc in docs, day in 1..DAYS)"
+    print " (if u in requests[doc,day] then roster[doc,day]=o"
+    print "     else roster[doc, day] in requests[doc, day]"
+    print " endif);"
+    print "";
+ 
+    print "array[1..DAYS] of var docs: ssu_doc;"
+    print "constraint forall(doc in docs,day in days)"
+    print "(if ssu[doc,day]=1 then ssu_doc[day]=doc"
+    print "endif);"
+    print ""
+
+    print "array[1..DAYS] of var docs: incharge_doc;"
+    print "constraint forall(doc in docs,day in days)"
+    print "(if incharge[doc,day]=1 then incharge_doc[day]=doc"
+    print "endif);"
+    print ""
+
+    print "array[1..DAYS] of var docs: oncall_doc;"
+    print "constraint forall(doc in docs,day in days)"
+    print "(if oncall[doc,day]=1 then oncall_doc[day]=doc"
+    print "endif);"
+    
+
+
+    # Requests array2d
+    print "array[docs, 1..DAYS] of set of shifts: requests =";
+    print "array2d(docs, 1..DAYS, [";
+    for (i = 1; i <= doc_count; i++) {
+        printf "  ";
+        for (j = 1; j <= num_days; j++) {
+            printf "%s", shifts_matrix[i, j];
+            if (j < num_days) printf ", ";
+        }
+        if (i < doc_count) {
+            printf ", %% %s\n", docs[i];
+        } else {
+            printf " %% %s\n", docs[i];
+        }
+    }
+    print "]);";
+
+    # A_COUNT and P_COUNT arrays using count
+    print "";
+    print "array[days] of var int: A_COUNT;";
+    print "array[days] of var int: P_COUNT;";
+    print "constraint forall(day in days)";
+    print "   (count(roster[..,day], a, A_COUNT[day]) /\\";
+    print "    count(roster[..,day], p, P_COUNT[day]));";
+
+    # Output block
+    print "";
+    print "% ===== OUTPUT =====";
+    print "%output[show2d(roster)++\"\\n\"];";
+    print "%output[\"AM \" ++ show(A_COUNT)++\"\\n\"];";
+    print "%output[\"PM \" ++ show(P_COUNT)];";
+
+
+    ##print SIC constraints with defaults 0 and 5 
+    sd="staff_sic.mzn"
+    print "" > sd
+    for(i=1;i<=doc_count;i++){
+    printf "constraint global_cardinality_low_up(      ssu[%s,..],[1],[%s],[%s]);",docs[i],0,5 >>sd
+    printf "\n" >>sd
+    }
+
+    for(i=1;i<=doc_count;i++){
+    printf "constraint global_cardinality_low_up(incharge[%s,..],[1],[%s],[%s]);",docs[i],0,5  >>sd
+    printf "\n"  >>sd
+    }
+    for(i=1;i<=doc_count;i++){
+    printf "constraint global_cardinality_low_up( oncall[%s,..],[1],[%s],[%s]);",docs[i],0,5  >>sd
+    printf "\n"  >>sd
+    }
+
+}
