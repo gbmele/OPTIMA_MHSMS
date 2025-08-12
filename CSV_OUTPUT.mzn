@@ -1,8 +1,29 @@
+array[docs,days] of var shifts: ROSTER_OUTPUT;
+
+constraint forall(doc in docs, day in days)
+           ( if    ssu[doc,day]=1        then ROSTER_OUTPUT[doc,day]=s 
+           elseif  incharge[doc,day]=1   then ROSTER_OUTPUT[doc,day]=i 
+           else    ROSTER_OUTPUT[doc,day]=roster[doc,day]
+           endif);
+
 %%THIS IS THE CSV OUTPUTTER!!!!!
 output [
   show(doc) ++ "," ++
-  concat([show(roster[doc, day]) ++ if day != 70 then "," else "" endif | day in days]) ++"\n"
+  concat([show(ROSTER_OUTPUT[doc, day]) ++ if day != 70 then "," else "" endif | day in days]) ++"\n"
   | doc in docs ];
+
+
+%%THIS IS THE CSV OUTPUTTER!!!!!
+%output [
+%  show(doc) ++ "," ++
+%  concat([show(roster[doc, day]) ++ if day != 70 then "," else "" endif | day in days]) ++"\n"
+%  | doc in docs ];
+
+
+
+
+
+
 %%SSU
 output [
   "SSU" ++ "," ++
