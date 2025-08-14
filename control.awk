@@ -18,12 +18,11 @@ function match_day(key, dow) {
 }
 
 {
-    c = split($0, LINE, ",")
     ret = ""
-    for (i = 2; i <= c; i++) {
+    for (i = 2; i <= NF; i++) {
         dow = (i - 1) % 7
         for (j = 1; j <= 2; j++) {
-            key = $1 "," LINE[i] "," j
+            key = $1 "," $i "," j
             if (match_day(key, dow)) {
                 ret = ret " " control[key]
             }
