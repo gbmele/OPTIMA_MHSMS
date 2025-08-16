@@ -1,4 +1,4 @@
-
+###
 BEGIN {
     debug=dbg=0
     OFS=","
@@ -43,7 +43,7 @@ BEGIN {
     }
 
 
-
+        ##input is gm,1234560,a,818
 	if(debug) print get_shift_out("gm",1,"a")
         if(debug) print get_shift_out("gm",2,"p")
 	if(debug) print get_shift_out("gm",4,"p")
@@ -81,5 +81,5 @@ function get_shift_out(doc, day_num, shift_in,    key, k, d) {
             }
         }
     }
-    return "not found"
+    return "\n\n\nNOT FOUND shift " shift_in "\n\n"
 }
