@@ -1,0 +1,4 @@
+gm,c,p,o,c,o,p,p
+db,a,p,o,s,i,p,p
+dh,a,o,c,o,p,p,p
+hl,a,s,c,i,p,p,p

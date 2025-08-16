@@ -1,0 +1,85 @@
+
+BEGIN {
+    debug=dbg=0
+    OFS=","
+    FS = ","  # CSV delimiter
+    file = "shifts.txt"
+    if(debug)print "Reading relation from ", file
+
+    # Load the relation
+    while ((getline line < file) > 0) {
+        n = split(line, fields, FS)
+        if(n==0) continue
+        if (n != 4) {
+            if(dbg) print "Skipping malformed line:", line
+            continue
+        }
+
+        doc = trim(fields[1])
+        dow = trim(fields[2])       # e.g., "012345"
+        shift_in = trim(fields[3])
+        shift_out = trim(fields[4])
+
+        key = doc SUBSEP dow SUBSEP shift_in
+
+        if (key in relation) {
+            if (relation[key] != shift_out) {
+                print "❌ Violation detected for key:", key
+                print "   Existing shift_code_out:", relation[key]
+                print "   New shift_code_out     :", shift_out
+            }
+        } else {
+            relation[key] = shift_out
+        }
+    }
+
+    close(file)
+    
+
+    if(debug) print "\nFinal Relation:"
+    for (k in relation) {
+        split(k, parts, SUBSEP)
+        if(debug) print "Doc:",parts[1], "DOWs:",parts[2], "In:", parts[3], "Out:", relation[k]
+    }
+
+
+
+	if(debug) print get_shift_out("gm",1,"a")
+        if(debug) print get_shift_out("gm",2,"p")
+	if(debug) print get_shift_out("gm",4,"p")
+	if(debug) print get_shift_out("gm",0,"p")
+	#    END BEGIN    
+}
+
+{
+    doc=$1
+    ret=doc
+    for(i=2;i<=NF;i++){
+       input_shift = $i
+        dow        = (i-1)%7
+        ret        = ret OFS get_shift_out(doc,dow,input_shift)
+     
+    }
+    print ret
+
+
+}
+
+
+function trim(s) {
+    gsub(/^[ \t\r\n]+|[ \t\r\n]+$/, "", s)
+    return s
+}
+
+function get_shift_out(doc, day_num, shift_in,    key, k, d) {
+    for (k in relation) {
+        split(k, parts, SUBSEP)
+        if (parts[1] == doc && parts[3] == shift_in) {
+            d = parts[2]  # dow string like "012345"
+            if (index(d, day_num) > 0) {
+                return relation[k]
+            }
+        }
+    }
+    return "not found"
+}
