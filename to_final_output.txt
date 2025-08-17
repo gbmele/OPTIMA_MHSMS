@@ -1,6 +1,7 @@
-###
+### needs shifts.txt in directory.
+### usage gawk -f to_final_output A_FILE_WITH_doc,shifts..........
 BEGIN {
-    debug=dbg=0
+    #debug=dbg=1
     OFS=","
     FS = ","  # CSV delimiter
     file = "shifts.txt"

@@ -1,8 +1,7 @@
 BEGIN {
-  
+  debug=1  
   ## usage gawk -f parse_optima2.txt "THE OPTIMA CSV DOWNLOAD FILE" 
 
-  ## h
   FS = ","
   OFS = ","
 
@@ -127,7 +126,7 @@ BEGIN {
 
 
     for (i = 1; i <= NF; i++) {
-      if(i==1 && row=="no_doc")next        #doc not in roster so doc="no_doc"
+      if(i==1 && row=="no_doc"){NO_DOCS[++nd]=$1;next}        #doc not in roster so doc="no_doc"
       if($1=="dayindex")next
       if (KEEP[i-1]) {
         shift = $i
@@ -140,7 +139,9 @@ BEGIN {
 
 
 END{
-
+       print "NO DOCS \n" > "parse_optima_log.txt"
+       for(d in NO_DOCS)  
+       print NO_DOCS[d]> "parse_optima_log.txt"
 }
 
 

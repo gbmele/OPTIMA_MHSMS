@@ -128,7 +128,7 @@ END {
     print "% ===== CONSTRAINTS =====";
     print " constraint forall(doc in docs, day in 1..DAYS)"
     print " (if       u in requests[doc,day] then roster[doc,day]=o"
-    print "  elseif   x in requests[doc,day] then roster[doc,day]=o   
+    print "  elseif   x in requests[doc,day] then roster[doc,day]=o"   
     print "  else roster[doc, day] in requests[doc, day]"
     print " endif);"
     print "";
