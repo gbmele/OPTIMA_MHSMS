@@ -198,9 +198,66 @@ predicate dont_split_full_weekend(docs:doc) =
                    endif);
 
 
-%%%%%SHIFTS PER WEEK
-%constraint forall (w in 1..WEEKS) (count(roster[SD,weeks[w]],c,1) \/ count(roster[SD,weeks[w]],l,4));
+constraint forall(d in[1..7,8..14])(valid_schedule_for(av,d,3));
 
+
+predicate valid_schedule_for(
+  docs: doc,
+  set of int: a_week,
+  int: required_leave_count) =
+    count(d in a_week)(roster[doc,d] in leave_shifts) >= required_leave_count    \/
+    
+    (  global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {1,2,3,4,5}],[a, p, c],[0,0,1],[1,1,1]) /\
+       global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {saturday,sunday}],[a,p,c],[0,0,0],[2,2,0])    /\
+       count(roster[doc,a_week],o,7 - required_leave_count));
+      
+
+    
+constraint forall(d in {6,7})(roster[av,d]=o);      
+
+ 
+  
+   
+     /*
+predicate valid_schedule_for(
+  int: doc,
+  int: required_leave_count,
+  array[int, int] of var shifts: roster
+) =
+  let {
+    set of int: weekdays = 1..5,
+    set of int: weekends = 6..7,
+
+    var int: leave_count = count(d in 1..7)(roster[doc, d] in leave_shifts),
+    var int: weekday_c_count = count(d in weekdays)(roster[doc, d] == c),
+    var int: weekend_a_count = count(d in weekends)(roster[doc, d] == a),
+    var int: weekend_p_count = count(d in weekends)(roster[doc, d] == p)
+  } in
+    (leave_count == required_leave_count)
+    \/
+    (
+      global_cardinality_low_up(
+        [roster[doc, d] | d in weekdays],
+        [a, p, c],
+        [1, 1, 1],
+        [1, 1, 1]
+      )
+      \/
+      (
+        (weekday_c_count == 1)
+        /\
+        ((weekend_a_count == 2) \/ (weekend_p_count == 2))
+      )
+    );
+*/
+%constraint forall (w in 1..WEEKS) (count(roster[av,weeks[w]],c,1) \/ count(roster[av,weeks[w]],l,4));
+
+%constraint forall(w in [1..7])  (global_cardinality_low_up(roster[av,w],[a,c,p,o],[0,1,0,4],[2,1,2,4]));
+
+%constraint assign_shifts(av,saturday,p,1,1);
+%constraint assign_shifts(av,sunday,p,1,1);
+
+%constraint roster[av,7]=p;
 
 /* 
 %%PAY_FORTNIGHT
