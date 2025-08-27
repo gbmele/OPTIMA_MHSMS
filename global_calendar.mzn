@@ -2,6 +2,8 @@ predicate DOC_TABLE(docs:doc,array[int,int]of shifts:doctable) =
           forall (w in weeks)(table([roster[doc,day] | day in w],doctable));
 
 
+%%constraint forall(doc in docs)(no_am_after_pm(doc));
+
 %for divmod
 int: monday     = 1;    
 int: tuesday    = 2;
@@ -196,12 +198,24 @@ predicate dont_split_full_weekend(docs:doc) =
                  ( if on_shift(doc,d) /\ on_shift(doc,d+1) then roster[doc,d]=roster[doc,d+1]
                    else true
                    endif);
-
-
-constraint forall(d in[1..7,8..14])(valid_schedule_for(av,d,3));
-
-
-predicate valid_schedule_for(
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+predicate shifts_3a1p(docs: doc, set of int: a_week,int:leave_count)=
+      count(d in a_week)(roster[doc,d] in leave_shifts) >=leave_count   \/
+     
+      (global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {1,2,3,4,5}],[a,p],[1,1],[3,1]) /\
+      global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {saturday,sunday}],[a,p],[0,0],[4,2])    /\
+     
+      count(roster[doc,a_week],o,7-leave_count));
+ 
+predicate shifts_2a1c1p(docs: doc, set of int: a_week,int:leave_count)=
+     count(d in a_week)(roster[doc,d] in leave_shifts) >=leave_count   \/
+     
+     (global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {1,2,3,4,5}],[a,p,c],[1,1,1],[2,1,1]) /\
+     global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {saturday,sunday}],[a,p,c],[0,0,0],[2,2,0])    /\
+     
+     count(roster[doc,a_week],o,7-leave_count)); 
+ 
+predicate shifts_1a1p1c_including_weekends(
   docs: doc,
   set of int: a_week,
   int: required_leave_count) =
@@ -210,15 +224,64 @@ predicate valid_schedule_for(
     (  global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {1,2,3,4,5}],[a, p, c],[0,0,1],[1,1,1]) /\
        global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {saturday,sunday}],[a,p,c],[0,0,0],[2,2,0])    /\
        count(roster[doc,a_week],o,7 - required_leave_count));
-      
 
+predicate shifts_1a1p1c_plus_weekends(
+  docs: doc,
+  set of int: a_week,
+  int: shifts_per_week) =
+    count(d in a_week)(roster[doc,d] in leave_shifts) >= shifts_per_week    \/
     
-constraint forall(d in {6,7})(roster[av,d]=o);      
+    (  global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {1,2,3,4,5}],[a, p, c],[1,1,1],[1,1,1]) /\
+       global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {saturday,sunday}],[a,p,c],[0,0,0],[2,2,0]));
+
+predicate shifts_1a1p_plus_weekends(
+  docs: doc,
+  set of int: a_week,
+  int: shifts_per_week) =
+    count(d in a_week)(roster[doc,d] in leave_shifts) >= shifts_per_week    \/
+    
+    (  global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {1,2,3,4,5}],[a, p, o],[1,1,0],[1,1,0]) /\
+       global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {saturday,sunday}],[a,p,c],[0,0,0],[2,2,0]));
+
+predicate shifts_1a1p_including_weekends(
+  docs: doc,
+  set of int: a_week,
+  int: shifts_per_week) =
+    count(d in a_week)(roster[doc,d] in leave_shifts) >= shifts_per_week    \/
+    
+    (  global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {1,2,3,4,5}],[a, p, o],[1,1,0],[1,1,0]) /\
+       global_cardinality_low_up([roster[doc,d] | d in a_week where d mod 7 in {saturday,sunday}],[a,p,c],[0,0,0],[2,2,0]) /\
+       count(roster[doc,a_week],o,7-shifts_per_week));
+
+
+
+
+
+
+
+
+constraint forall(d in[1..7,8..14])(shifts_1a1p1c_including_weekends(av,d,3));
+constraint no_split_weekend(av);
+
+          
+%constraint forall(d in {6,7})(roster[av,d]=o);      
+
+
+constraint forall(d in [1..7,8..14])(shifts_3a1p(cc,d,4));
+constraint no_split_weekend(cc);
+constraint no_am_after_pm(cc);
+constraint assign_shifts(cc,saturday,a,0,0);
+constraint assign_shifts(cc,friday,p,0,0);
+constraint no_consec_weekends(cc); 
 
  
-  
-   
-     /*
+constraint forall(d in [1..7,8..14])(shifts_2a1c1p(sd,d,4));
+
+constraint forall(d in [1..7,8..14])(shifts_3a1p(db,d,4)) /\ no_split_weekend(db); 
+ 
+ 
+ 
+ /*
 predicate valid_schedule_for(
   int: doc,
   int: required_leave_count,

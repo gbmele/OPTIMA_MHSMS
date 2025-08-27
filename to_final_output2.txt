@@ -1,0 +1,38 @@
+BEGIN{
+    usage gawk -f to_final_output2.txt shifts.txt DATA FILE
+
+FS=","
+OFS=","
+ split("0123456", daynames, "")
+}
+
+NR==FNR{
+    person = $1
+    bitmask = $2
+    key = $3
+    value = $4
+
+    for (i = 1; i <= length(bitmask); i++) {
+        d = substr(bitmask, i, 1)
+        day = daynames[int(d)+1]
+        data[person "|" day "|" key] = value
+    }
+    next
+}
+
+{
+  ret=""
+  doc=$1
+  for(i=2;i<=NF;i++){
+     dow =(i-1)%7
+     ret = ret OFS data[$1 "|" dow "|" $i]   
+ }
+  print doc ret
+}
+END{
+    print data["gm" "|" 1 "|" "a"]
+    print data["gm|2|p"]
+    print data["gm|3|o"]
+    print data["dh" "|" "6" "|" "p"]
+
+}

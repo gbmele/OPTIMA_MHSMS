@@ -1,0 +1,5 @@
+gm,ac,p,o,c,ao,o,ao,ac,p,o,c,ao,o,ao
+db,a,p,o,a,apo,apo,apo,a,p,o,a,apo,apo,apo
+sd,ac,ac,ac,apo,apo,apo,apo,ac,ac,ac,apo,apo,apo,apo
+cc,po,o,a,a,apo,apo,apo,po,o,a,a,apo,apo,apo
+av,acpo,apco,apco,apco,apo,apo,apo,acpo,apco,apco,apco,apo,apo,apo
