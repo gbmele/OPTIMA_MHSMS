@@ -1,0 +1,42 @@
+BEGIN{
+
+    FS=","
+    OFS=","
+    debug=0
+
+#    FS = "\",\""; OFS = ","
+
+}
+{  c=split($0,LINE,",")
+   
+    ret=""
+    for(i=1;i<=c;i++){
+        if($i ~ (/Mon|Tue|Wed|Thu|Fri|Sat|Sun/)){ 
+            KEEP_COL[i]=1
+            ret=ret " field " i "col-" LINE[i] "-"daycount
+    
+        }
+    }
+    ret = NR "-" ret  " " $1 "-" NF
+    if(debug) print ret
+
+    ##then
+    ret=""
+    for(i=1;i<=c;i++){
+
+	if(KEEP_COL[i-1]){             ## extra col cos of "," in first column
+    		if(LINE[i]==""){
+        		shift="o"
+    		} else {
+        		shift=LINE[i]
+        	}
+   	 ret = ret OFS shift
+
+	}#endif
+    }#endfor
+    
+    if($1 !="" && $1~/Specialist|Doctor/){
+        nn=split($1,NAMES," ") ##nn is the last item in the array
+        print NAMES[nn] ret
+     }
+}
