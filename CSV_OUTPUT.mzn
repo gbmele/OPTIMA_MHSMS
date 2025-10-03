@@ -1,29 +1,40 @@
-array[docs,days] of var shifts: ROSTER_OUTPUT;
+%%OUTPUT
 
-constraint forall(doc in docs, day in days)
-           ( if    ssu[doc,day]=1        then ROSTER_OUTPUT[doc,day]=s 
-           elseif  incharge[doc,day]=1   then ROSTER_OUTPUT[doc,day]=i 
-           else    ROSTER_OUTPUT[doc,day]=roster[doc,day]
-           endif);
+  function var shifts: prnt(var shifts:s) =
+     (if      s in leave_shifts then l
+      else  s
+      endif);
+
+
+
+%output[if day = 1 then show(doc) ++ "," else "" endif ++ show(roster[doc,day]) ++ if day = 70 then "\n" else "," endif | doc in docs,day in days];
+
+output["\n"];
+output ["wk 1          |wk 2          ||  wk 3        |   wk 4       ||    wk 5      |   wk 6       ||    wk 7      |   wk 8       ||     wk 9     |   wk 10      \n"];
+output ["M T W T F S S |M T W T F S S ||M T W T F S S |M T W T F S S ||M T W T F S S | M T W T F S S||M T W T F S S |M T W T F S S ||M T W T F S S |M T W T F S S \n"];
+output["--------------------------------------------------------------------------------------------------------------------------------------------------------\n"];
+output[show(prnt(roster[doc,day])) ++ " " ++ if day mod 7 = sunday then "|" else "" endif  ++if day mod 14==0 then"|" else "" endif  ++ if day = 70  then show(doc) ++  " " ++ 
+                                                                                                            " \n" else "" endif 
+      | doc in docs, day in days];
+      
+output["--------------------------------------------------------------------------------------------------------------------------------------------------------\n"];
+output [show(count([roster[doc,day]|doc in docs],a)) ++ " " ++ if day mod 7 = sunday then "|" else "" endif   ++if day mod 14==0 then"|" else "" endif  ++ if day = 70 then "am" else "" endif | day in days] ;output["\n"];
+output [show(count(roster[..,day],p)) ++ " " ++ if day mod 7 = sunday then "|" else "" endif   ++if day mod 14==0 then"|" else "" endif  ++ if day = 70 then "pm" else "" endif| day in days] ;output["\n"];
+%output [show(count(incharge[..,day],1)) ++ " " ++ if day mod 7 = sunday then "|" else "" endif    ++if day mod 14==0 then"|" else "" endif ++ if day = 70 then "INCHARGE" else "" endif| day in days] ;output["\n"];
+%output [show(count(ssu[..,day],1)) ++ " " ++ if day mod 7 = sunday then "|" else "" endif    ++if day mod 14==0 then"|" else "" endif ++ if day = 70 then "SSU" else "" endif| day in days] ;output["\n"];
+
+
+output["%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"];
+
+output["%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n"];
+
+
 
 %%THIS IS THE CSV OUTPUTTER!!!!!
 output [
   show(doc) ++ "," ++
-  concat([show(ROSTER_OUTPUT[doc, day]) ++ if day != 70 then "," else "" endif | day in days]) ++"\n"
+  concat([show(roster[doc, day]) ++ if day != 70 then "," else "" endif | day in days]) ++"\n"
   | doc in docs ];
-
-
-%%THIS IS THE CSV OUTPUTTER!!!!!
-%output [
-%  show(doc) ++ "," ++
-%  concat([show(roster[doc, day]) ++ if day != 70 then "," else "" endif | day in days]) ++"\n"
-%  | doc in docs ];
-
-
-
-
-
-
 %%SSU
 output [
   "SSU" ++ "," ++
@@ -39,7 +50,6 @@ output [
   "CALL" ++ "," ++
   concat([show(oncall_doc[day]) ++ if day != 70 then "," else "" endif| day in days])];
 output ["\n"];
-
 
 
 
