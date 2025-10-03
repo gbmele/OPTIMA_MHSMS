@@ -124,8 +124,8 @@ END {
     print "constraint forall(d in wednesdays)(global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %wed"
     print "constraint forall(d in thursdays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %thu"
     print "constraint forall(d in fridays)   (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %fri"
-    print "constraint forall(d in saturdays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %sat"
-    print "constraint forall(d in sundays)   (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %sun"
+    print "constraint forall(d in saturdays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 2,2 ],[ 6,6 ])); %sat"
+    print "constraint forall(d in sundays)   (global_cardinality_low_up(roster[..,d],[ a , p ],[ 2,2 ],[ 6,6 ])); %sun"
     print "\n\n"
 
     # Decision variables and constraints
@@ -213,6 +213,5 @@ END {
     printf "constraint global_cardinality_low_up( oncall[%s,..],[1],[%s],[%s]);",docs[i],0,5  >>sd
     printf "\n"  >>sd
     }
-    system("echo remember staff_sic.mzn has been printed as well\n")
 
 }
