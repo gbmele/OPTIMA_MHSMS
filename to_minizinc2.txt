@@ -73,6 +73,7 @@ END {
     num_days = NF - 1;
 
     # Include files
+    print "%%% REMEMBER staff_sic.mzn is output by to_minizinc2.txt"
     print "include \"globals.mzn\";";
     print "include \"global_calendar.mzn\";";
     print "include \"staff_sic.mzn\";";
@@ -212,5 +213,6 @@ END {
     printf "constraint global_cardinality_low_up( oncall[%s,..],[1],[%s],[%s]);",docs[i],0,5  >>sd
     printf "\n"  >>sd
     }
+    system("echo remember staff_sic.mzn has been printed as well\n")
 
 }
