@@ -118,13 +118,13 @@ END {
 
     #roster counts am pm 
     print "\n\n"
-    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %mon"
-    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %tue"
-    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %wed"
-    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %thu"
-    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %fri"
-    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %sat"
-    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %sun"
+    print "constraint forall(d in mondays)   (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %mon"
+    print "constraint forall(d in tuesdays)  (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %tue"
+    print "constraint forall(d in wednesdays)(global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %wed"
+    print "constraint forall(d in thursdays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %thu"
+    print "constraint forall(d in fridays)   (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %fri"
+    print "constraint forall(d in saturdays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %sat"
+    print "constraint forall(d in sundays)   (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3 ],[ 6,6 ])); %sun"
     print "\n\n"
 
     # Decision variables and constraints
