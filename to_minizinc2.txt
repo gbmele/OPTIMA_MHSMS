@@ -1,7 +1,8 @@
 #!/usr/bin/awk -f
 
 #usage gawk -f to_minizinc2.txt test_csv.txt > test_mzn.mzn
-
+## outputs to test_mzn.mzn and also outputs staff_sic.mzn
+## output and 
 
 BEGIN {
     FS = ","; OFS = ",";
@@ -72,12 +73,11 @@ END {
     num_days = NF - 1;
 
     # Include files
-    print "include \"globals.mzn\";"
-    print "include \"global_calendar.mzn\";"
-    print "include \"SIC.mzn\";";
-    print "include \"staff_sic.mzn\";"
-    print "include \"CSV_OUTPUT.mzn\";"
-    print ""
+    print "include \"globals.mzn\";";
+    print "include \"global_calendar.mzn\";";
+    print "include \"staff_sic.mzn\";";
+    print "include \"CSV_OUTPUT.mzn\";";
+    print "";
 
     # DAYS constant and days set
     printf "int: DAYS = %d;\n", num_days;
@@ -115,6 +115,17 @@ END {
         if (count < length(leave_shifts)) printf ", ";
     }
     print "};";
+
+    #roster counts am pm 
+    print "\n\n"
+    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %mon"
+    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %tue"
+    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %wed"
+    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %thu"
+    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %fri"
+    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %sat"
+    print "constraint forall(d in fridays) (global_cardinality_low_up(roster[..,d],[ a , p ],[ 3,3],[6,6])); %sun"
+    print "\n\n"
 
     # Decision variables and constraints
     print "";
