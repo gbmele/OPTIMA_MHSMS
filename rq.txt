@@ -1,0 +1,6 @@
+bl,c,c,c,p,o,u,u,c,c,c,p,u,u,u
+gm,c,p,o,c,ao,o,ao,c,p,o,c,ao,o,ao
+cc,x,x,x,x,up,apo,apo,op,ao,ao,x,x,o,o
+db,x,x,x,x,up,x,x,x,x,o,x,x,xx,x
+mc,x,x,x,x,x,x,x,x,x,x,x,x,x,u
+lb,o,o,o,o,o,o,x,x,o,x,o,o,u,u
