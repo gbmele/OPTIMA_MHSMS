@@ -1,0 +1,6 @@
+bl,c,c,c,op,apo,apo,apo,c,c,c,op,apo,apo,apo
+gm,c,p,o,c,ao,o,ao,c,p,o,c,ao,o,ao
+cc,op,ao,ao,ao,apo,apo,apo,op,ao,ao,ao,apo,apo,apo
+db,ao,po,o,ao,apo,apo,apo,ao,po,o,ao,apo,apo,apo
+mc,ao,ao,apo,c,apo,apo,apo,ao,ao,apo,c,apo,apo,apo
+lb,ao,o,ao,o,o,ao,ao,ao,o,ao,o,o,ao,ao
