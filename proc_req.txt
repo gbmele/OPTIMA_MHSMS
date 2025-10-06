@@ -1,0 +1,21 @@
+BEGIN{
+    ##usage 
+    
+    OFS=","
+    FS=","
+}
+NR==FNR { 
+    for (i=1; i<=NF; i++) file1[NR,i] = $i 
+    next 
+  }
+{
+    ret=""
+    for (i=2; i<=NF; i++) {
+        if(match($i,/[x,o]/)){
+            ret = ret OFS "o"}
+        else{
+            ret = ret OFS file1[FNR,i]    
+        }
+    }
+    print $1 ret
+  }
