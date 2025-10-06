@@ -1,0 +1,28 @@
+BEGIN{
+    weeks = 2
+
+    OFS=","
+    template["gm"]="c,p,o,c,ao,o,ao"
+    docs[2]="gm"
+    template["bl"]="c,c,c,op,apo,apo,apo"
+    docs[1]="bl"
+    template["cc"]="op,ao,ao,ao,apo,apo,apo"
+    docs[3]="cc"
+    template["db"]="ao,po,o,ao,apo,apo,apo"
+    docs[4]="db"
+    template["mc"]="ao,ao,apo,c,apo,apo,apo"
+    docs[5]="mc"
+    template["lb"]="ao,o,ao,o,o,ao,ao"
+    docs[6]="lb"
+}
+
+END{
+for(doc=1;doc<=length(docs);doc++){
+    ret=""
+    for(wk=1;wk<=weeks;wk++){
+        ret=ret OFS template[docs[doc]]
+    }
+    print docs[doc] ret
+}
+
+}
